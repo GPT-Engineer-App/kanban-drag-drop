@@ -32,7 +32,11 @@ const initialData = {
 
 const KanbanBoard = () => {
   const [data, setData] = useState(initialData);
-  const [newCardContent, setNewCardContent] = useState("");
+  const [newCardContents, setNewCardContents] = useState({
+    "column-1": "",
+    "column-2": "",
+    "column-3": "",
+  });
 
   const onDragEnd = (result) => {
     const { destination, source, draggableId } = result;
@@ -101,7 +105,7 @@ const KanbanBoard = () => {
 
   const addNewCard = (columnId) => {
     const newCardId = `card-${Object.keys(data.cards).length + 1}`;
-    const newCard = { id: newCardId, content: newCardContent };
+    const newCard = { id: newCardId, content: newCardContents[columnId] };
 
     const newState = {
       ...data,
@@ -119,7 +123,17 @@ const KanbanBoard = () => {
     };
 
     setData(newState);
-    setNewCardContent("");
+    setNewCardContents((prevContents) => ({
+      ...prevContents,
+      [columnId]: "",
+    }));
+  };
+
+  const handleCardContentChange = (columnId, content) => {
+    setNewCardContents((prevContents) => ({
+      ...prevContents,
+      [columnId]: content,
+    }));
   };
 
   return (
@@ -130,7 +144,14 @@ const KanbanBoard = () => {
           const cards = column.cardIds.map((cardId) => data.cards[cardId]);
 
           return (
-            <Column key={column.id} column={column} cards={cards} addNewCard={addNewCard} newCardContent={newCardContent} setNewCardContent={setNewCardContent} />
+            <Column
+              key={column.id}
+              column={column}
+              cards={cards}
+              addNewCard={addNewCard}
+              newCardContent={newCardContents[columnId]}
+              setNewCardContent={handleCardContentChange}
+            />
           );
         })}
       </div>
@@ -176,7 +197,7 @@ const Column = ({ column, cards, addNewCard, newCardContent, setNewCardContent }
           <div className="mt-4">
             <Input
               value={newCardContent}
-              onChange={(e) => setNewCardContent(e.target.value)}
+              onChange={(e) => setNewCardContent(column.id, e.target.value)}
               placeholder="New card content"
               className="mb-2"
             />
